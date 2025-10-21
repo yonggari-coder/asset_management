@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const form = await req.formData();
   const payload = {
     sku: String(form.get("sku") || ""),
@@ -7,7 +7,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     category: String(form.get("category") || ""),
     unit: String(form.get("unit") || "ea"),
   };
-  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/locations/${params.id}`, {
+  const { id } = await params;
+  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/locations/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
