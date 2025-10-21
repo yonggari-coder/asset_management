@@ -32,7 +32,7 @@ begin
 end $$;
 
 
-// location의 경우우
+// locations의 경우
 
 -- 안전: UUID 함수용
 create extension if not exists "pgcrypto";
