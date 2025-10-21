@@ -1,0 +1,62 @@
+Supabase의 sql editor에서 해당 SQL문을 작성해주자. (테이블 생성)
+
+//items의 경우 
+
+-- UUID 생성 함수 (안전하게)
+create extension if not exists "pgcrypto";
+
+-- app/api/items* 코드와 정확히 맞춘 스키마
+create table if not exists public.items (
+  id         uuid primary key default gen_random_uuid(),
+  sku        text unique not null,
+  name       text not null,
+  category   text,
+  spec       jsonb,
+  unit       text default 'ea',
+  photo_url  text,
+  created_at timestamptz default now()
+);
+
+-- (선택) 읽기 RLS 정책: 로그인 사용자는 조회 가능
+alter table public.items enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname='public' and tablename='items' and policyname='items_read_all'
+  ) then
+    create policy "items_read_all" on public.items
+      for select using (auth.role() = 'authenticated');
+  end if;
+end $$;
+
+
+// location의 경우우
+
+-- 안전: UUID 함수용
+create extension if not exists "pgcrypto";
+
+-- locations 테이블 (id, name, type, code)
+create table if not exists public.locations (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  type text not null check (type in ('warehouse','department')),
+  code text unique,
+  created_at timestamptz default now()
+);
+
+-- (선택) 읽기용 RLS 정책: 로그인 사용자는 모두 조회 가능
+alter table public.locations enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname='public' and tablename='locations' and policyname='locations_read_all'
+  ) then
+    create policy "locations_read_all" on public.locations
+      for select
+      using (auth.role() = 'authenticated'); -- 로그인 사용자 읽기 허용
+  end if;
+end $$;
