@@ -8,13 +8,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     unit: String(form.get("unit") || "ea"),
   };
   const { id } = await params;
-  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/items/${id}`, {
+
+  const apiUrl = new URL(`/api/items/${id}`, req.url);
+  const res = await fetch(apiUrl.toString(), {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json",
+      cookie: req.headers.get("cookie") || "",
+    },
+    cache: "no-store",
     body: JSON.stringify(payload),
   });
-  const json = await res.json();
-  if (!res.ok) return NextResponse.json(json, { status: res.status });
+  if (!res.ok) return NextResponse.json(await res.json(), { status: res.status });
   return NextResponse.redirect(new URL("/items", req.url));
 }
 
