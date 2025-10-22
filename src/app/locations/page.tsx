@@ -21,20 +21,18 @@ export default async function LocationsPage() {
       <table className="min-w-full border">
         <thead className="bg-gray-50">
           <tr>
-            <th className="p-2 border">SKU</th>
             <th className="p-2 border">Name</th>
-            <th className="p-2 border">Category</th>
-            <th className="p-2 border">Unit</th>
+            <th className="p-2 border">Type</th>
+            <th className="p-2 border">Code</th>
             <th className="p-2 border">Actions</th>
           </tr>
         </thead>
         <tbody>
           {locations.map((it) => (
             <tr key={it.id} className="border-b">
-              <td className="p-2 border">{it.sku}</td>
               <td className="p-2 border">{it.name}</td>
-              <td className="p-2 border">{it.category || "-"}</td>
-              <td className="p-2 border">{it.unit || "ea"}</td>
+              <td className="p-2 border">{it.type || "-"}</td>
+              <td className="p-2 border">{it.code || "ea"}</td>
               <td className="p-2 border">
                 <Link href={`/locations/${it.id}`} className="underline">Edit</Link>
               </td>

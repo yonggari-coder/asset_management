@@ -1,28 +1,31 @@
-// app/items/[id]/page.tsx
+// src/app/locations/[id]/page.tsx
 import { notFound } from "next/navigation";
 
-async function getItem(id: string) {
-  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/items`, { cache: "no-store" });
+async function getLocation(id: string) {
+  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/locations`, { cache: "no-store" });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || "failed");
-  return (json.items as any[]).find(x => x.id === id);
+  return (json.locations as any[]).find(x => x.id === id);
 }
 
-export default async function EditItem({ params }: { params: { id: string } }) {
-  const item = await getItem(params.id);
-  if (!item) notFound();
+export default async function EditLocation({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const location = await getLocation(id);
+  if (!location) notFound();
 
   return (
     <main className="p-6 max-w-xl space-y-3">
-      <h1 className="text-xl font-semibold">Edit Item</h1>
-      <form action={`/items/${item.id}/_update`} method="post" className="grid gap-3">
-        <input name="sku" defaultValue={item.sku} className="border p-2 rounded"/>
-        <input name="name" defaultValue={item.name} className="border p-2 rounded"/>
-        <input name="category" defaultValue={item.category || ""} className="border p-2 rounded"/>
-        <input name="unit" defaultValue={item.unit || "ea"} className="border p-2 rounded"/>
+      <h1 className="text-xl font-semibold">Edit Location</h1>
+      <form method="post" className="grid gap-3">
+        <input name="name" defaultValue={location.name} className="border p-2 rounded" placeholder="Location Name"/>
+        <select name="type" defaultValue={location.type} className="border p-2 rounded">
+          <option value="warehouse">Warehouse</option>
+          <option value="department">Department</option>
+        </select>
+        <input name="code" defaultValue={location.code || ""} className="border p-2 rounded" placeholder="Code (optional)"/>
         <div className="flex gap-2">
-          <button formAction={`/items/${item.id}/_patch`} className="px-3 py-2 rounded bg-black text-white">Save</button>
-          <button formAction={`/items/${item.id}/_delete`} className="px-3 py-2 rounded bg-red-600 text-white">Delete</button>
+          <button formAction={`/locations/${location.id}/patch`} className="px-3 py-2 rounded bg-black text-white">Save</button>
+          <button formAction={`/locations/${location.id}/delete`} className="px-3 py-2 rounded bg-red-600 text-white">Delete</button>
         </div>
       </form>
     </main>
