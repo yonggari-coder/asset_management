@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Boxes, MapPin, Package, Shuffle, Grid3X3, QrCode } from "lucide-react";
+import { Boxes, MapPin, Package, Shuffle, Grid3X3, QrCode, MapIcon } from "lucide-react";
 
 type Props = { onNavigate?: () => void };
 
@@ -12,8 +12,10 @@ const routes = [
   { href: "/items", label: "품목(Items)", icon: Package },
   { href: "/locations", label: "위치(Locations)", icon: MapPin },
   { href: "/stock", label: "재고(Stock)", icon: Boxes },
+  { href: "/maps", label: "맵(Maps)", icon: MapIcon },
   { href: "/tx", label: "입/출고/이동", icon: Shuffle },
   { href: "/labels", label: "라벨/QR", icon: QrCode },
+
 ];
 
 export default function AppNav({ onNavigate }: Props) {
