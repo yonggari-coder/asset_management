@@ -4,6 +4,7 @@ import Link from "next/link";
 import AppNav from "../components/AppNav";
 import MobileDrawer from "../components/MobileDrawer";
 import MobileNavTrigger from "../components/MobileNavTrigger";
+import Image from "next/image";
 
 export const metadata = {
   title: "IMS",
@@ -17,7 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex min-h-screen">
           {/* Sidebar */}
           <aside className="hidden md:block w-64 border-r bg-white">
-            <div className="h-14 flex items-center px-4 border-b font-semibold">🏷️ IMS</div>
+            <div className="flex items-center gap-2">
+              <Image className="ml-5 mt-2"src="/globe.svg" alt="IMS" width={50} height={30} />
+              <span className="h-21 flex items-center px-4 font-semibold text-2xl">물품 보관소</span>
+            </div>
             <AppNav />
           </aside>
 
