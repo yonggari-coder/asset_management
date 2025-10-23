@@ -10,6 +10,7 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import Papa from "papaparse";
+import { useSearchParams } from "next/navigation";
 
 type Item = { id: string; sku: string; name: string };
 type Location = { id: string; name: string };
@@ -95,7 +96,7 @@ export default function StockPage() {
       id: `loc:${loc.id}`,
       header: loc.name,
       accessorKey: `loc:${loc.id}`,
-      cell: ({ getValue }) => <div className="text-right tabular-nums">{Number(getValue() || 0)}</div>,
+      cell: ({ getValue }) => <div className="text-left tabular-nums">{Number(getValue() || 0)}</div>,
       sortingFn: "alphanumeric",
     }));
     
@@ -113,7 +114,7 @@ export default function StockPage() {
         header: "합계",
         accessorKey: "total",
         cell: ({ getValue }) => (
-          <div className="text-right font-semibold tabular-nums">{Number(getValue() || 0)}</div>
+          <div className="text-left font-semibold tabular-nums">{Number(getValue() || 0)}</div>
         ),
         sortingFn: "alphanumeric",
       },
@@ -132,20 +133,6 @@ export default function StockPage() {
     // enableSortingRemoval: false,
   });
 
-  function exportCSV() {
-    const headers = table.getAllLeafColumns().map(c => c.columnDef.header as string);
-    const data = table.getRowModel().rows.map(r =>
-      table.getAllLeafColumns().map(c => r.getValue(c.id) ?? "")
-    );
-    const csv = Papa.unparse({ fields: headers, data });
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `stock_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
   //기존
   // const totals: Record<string, number> = {};
   // const key = `Loc:$
@@ -172,9 +159,7 @@ export default function StockPage() {
             onChange={(e) => setQ(e.target.value)}
             className="border rounded px-3 py-2 text-sm"
           />
-          <button onClick={exportCSV} className="px-3 py-2 text-sm rounded border">
-            CSV 다운로드
-          </button>
+
         </div>
       </div>
 
@@ -202,7 +187,7 @@ export default function StockPage() {
             {table.getRowModel().rows.map(r => (
               <tr key={r.id} className="border-b hover:bg-gray-50">
                 {r.getVisibleCells().map(c => (
-                  <td key={c.id} className="p-2 align-middle whitespace-nowrap">
+                  <td key={c.id} className="p-2 align-middle whitespace-nowrap text-left">
                     {flexRender(c.column.columnDef.cell, c.getContext())}
                   </td>
                 ))}
@@ -223,11 +208,11 @@ export default function StockPage() {
                 <td className="p-2">합계</td>
                 <td className="p-2"></td>
                 {locations.map(loc => (
-                  <td key={`f-${loc.id}`} className="p-2 text-right tabular-nums">
+                  <td key={`f-${loc.id}`} className="p-2 text-left tabular-nums">
                     {footerTotals[`loc:${loc.id}`] || 0}
                   </td>
                 ))}
-                <td className="p-2 text-right tabular-nums">{footerTotals["total"] || 0}</td>
+                <td className="p-2 text-left tabular-nums">{footerTotals["total"] || 0}</td>
               </tr>
             </tfoot>
           )}
