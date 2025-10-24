@@ -15,7 +15,26 @@ export default function MapEditorPage() {
   const [paint, setPaint] = useState<string | null>(null); // location_id
   const [tool, setTool] = useState<"paint"|"erase">("paint");
   const [dragging, setDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{x: number, y: number} | null>(null);
+  const [dragEnd, setDragEnd] = useState<{x: number, y: number} | null>(null);
   const [msg, setMsg] = useState("");
+  
+  function applyRect(x1: number, y1: number, x2: number, y2: number) {
+    const minX = Math.min(x1, x2);
+    const maxX = Math.max(x1, x2);
+    const minY = Math.min(y1, y2);
+    const maxY = Math.max(y1, y2);
+    
+    const newCells = { ... cells};
+    for (let y = minY; y<=maxY; y++) {
+      for (let x = minX; x<= maxX; x++){
+        const key = `${x},${y}`;
+        newCells[key] = tool === "erase" ? null: paint;
+      }
+    }
+    setCells(newCells);
+  }
+
 
   // 초기 로드: 맵 목록 + 위치 목록
   useEffect(() => {
@@ -151,9 +170,20 @@ export default function MapEditorPage() {
       {/* 그리드 */}
       {meta ? (
         <div
-          className="inline-block select-none"
-          onMouseLeave={()=>setDragging(false)}
-          onMouseUp={()=>setDragging(false)}
+          className="inline-block select-none relative"
+          onMouseLeave={() => {
+            setDragging(false);
+            setDragStart(null);
+            setDragEnd(null);
+          }}
+          onMouseUp={() => {
+            if (dragging && dragStart && dragEnd) {
+              applyRect(dragStart.x, dragStart.y, dragEnd.x, dragEnd.y);
+            }
+            setDragging(false);
+            setDragStart(null);
+            setDragEnd(null);
+          }}
         >
           {Array.from({ length: meta.height }).map((_, y) => (
             <div key={y} className="flex">
@@ -164,9 +194,17 @@ export default function MapEditorPage() {
                 return (
                   <div
                     key={key}
-                    onMouseDown={(e)=>{ e.preventDefault(); setDragging(true); applyAt(x,y); }}
-                    onMouseEnter={()=> dragging && applyAt(x,y)}
-                    onClick={()=> applyAt(x,y)}
+                    onMouseDown={(e) => { 
+                      e.preventDefault(); 
+                      setDragging(true); 
+                      setDragStart({x, y}); 
+                      setDragEnd({x, y}); 
+                    }}
+                    onMouseEnter={() => {
+                      if (dragging) {
+                        setDragEnd({x, y});
+                      }
+                    }}
                     className="border border-gray-300"
                     style={{ width: 24, height: 24, background: color }}
                     title={locId ? locations.find(l=>l.id===locId)?.name : ""}
@@ -175,6 +213,19 @@ export default function MapEditorPage() {
               })}
             </div>
           ))}
+          
+          {/* 드래그 프리뷰 */}
+          {dragging && dragStart && dragEnd && (
+            <div
+              className="absolute pointer-events-none border-2 border-blue-500 bg-blue-200 bg-opacity-30"
+              style={{
+                left: Math.min(dragStart.x, dragEnd.x) * 24,
+                top: Math.min(dragStart.y, dragEnd.y) * 24,
+                width: (Math.abs(dragEnd.x - dragStart.x) + 1) * 24,
+                height: (Math.abs(dragEnd.y - dragStart.y) + 1) * 24,
+              }}
+            />
+          )}
         </div>
       ) : (
         <p className="text-gray-500">왼쪽에서 맵을 선택하거나 새로 만들기</p>
